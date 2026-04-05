@@ -13,7 +13,7 @@ export default function OtpVerification() {
 
   const [otp, setOtp] = useState('');
   const [emailInput, setEmailInput] = useState(location.state?.email || '');
-  const [purposeInput, setPurposeInput] = useState(location.state?.purpose || 'login');
+  const [purposeInput, setPurposeInput] = useState(location.state?.purpose || 'signup');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
@@ -99,14 +99,7 @@ export default function OtpVerification() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Purpose</label>
-              <select
-                value={purposeInput}
-                onChange={(e) => setPurposeInput(e.target.value)}
-                className="input-field"
-              >
-                <option value="login">Login</option>
-                <option value="signup">Signup</option>
-              </select>
+              <input value="Signup" className="input-field bg-slate-50" readOnly />
             </div>
 
             <button type="submit" disabled={isSubmitting} className="btn-primary w-full py-3 text-sm disabled:opacity-60">

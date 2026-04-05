@@ -24,6 +24,11 @@ export function AuthProvider({ children }) {
   const login = useCallback(async (email, password) => {
     const { default: api } = await import("../utils/api");
     const { data } = await api.post("/auth/login", { email, password });
+    if (data?.token) localStorage.setItem("sikkimpg_token", data.token);
+    if (data?.user) {
+      setCurrentUser(data.user);
+      localStorage.setItem("sikkimpg_user", JSON.stringify(data.user));
+    }
     return data;
   }, []);
 

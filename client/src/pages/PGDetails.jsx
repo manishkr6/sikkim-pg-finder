@@ -46,12 +46,17 @@ export default function PGDetails() {
     toast.success(isSaved ? 'Removed from saved' : 'Saved!');
   };
 
-  const handleReport = () => {
+  const handleReport = async () => {
+    if (!currentUser) { navigate('/login'); return; }
     if (!reportReason.trim()) { toast.error('Please enter a reason'); return; }
-    reportPG(pg.id, currentUser?.id, reportReason);
-    setReportOpen(false);
-    setReportReason('');
-    toast.success('Report submitted to admin');
+    try {
+      await reportPG(pg.id, currentUser?.id, reportReason);
+      setReportOpen(false);
+      setReportReason('');
+      toast.success('Report submitted to admin');
+    } catch (e) {
+      toast.error(e?.response?.data?.message || 'Failed to submit report');
+    }
   };
 
   const handleReview = async () => {
@@ -206,11 +211,15 @@ export default function PGDetails() {
               )}
               {activeTab === 'rules' && (
                 <div className="space-y-3 text-sm text-slate-600">
-                  {['No loud music after 10 PM', 'No outside guests after 9 PM', 'Keep common areas clean', 'Electricity bill included up to 200 units', 'Monthly rent due on 5th of each month', 'One month advance deposit required', 'No cooking in rooms (if food provided)'].map(rule => (
-                    <div key={rule} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl">
-                      <span className="text-primary-500 font-bold">·</span> {rule}
-                    </div>
-                  ))}
+                  {(pg.rules || []).length > 0 ? (
+                    pg.rules.map(rule => (
+                      <div key={rule} className="flex items-start gap-2 p-3 bg-slate-50 rounded-xl">
+                        <span className="text-primary-500 font-bold">*</span> {rule}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-500 text-sm py-2">No custom rules added by owner.</p>
+                  )}
                 </div>
               )}
               {activeTab === 'location' && (

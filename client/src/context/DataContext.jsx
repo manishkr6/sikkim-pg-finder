@@ -48,6 +48,7 @@ export function DataProvider({ children }) {
       ownerName: pg.owner?.name,
       ownerEmail: pg.owner?.email,
       location: pg.location || { city: '', area: '', address: '' },
+      rules: Array.isArray(pg.rules) ? pg.rules : [],
       createdAt: dateOnly(pg.createdAt),
     };
   };
@@ -239,14 +240,24 @@ export function DataProvider({ children }) {
   }, [HAS_BACKEND, currentUser?.id, currentUser?.role, fetchAdminData, fetchApprovedPgsAndReviews, fetchOwnerPgs, fetchSavedPgs, fetchNotifications]);
 
   // ── PG Queries ──
-  const getApprovedPGs = useCallback(() =>
-    pgs.filter(pg => pg.status === 'approved' && !pg.isDeleted), [pgs]);
+  const getApprovedPGs = useCallback(
+    () =>
+      pgs.filter(
+        (pg) =>
+          ['approved', 'pending_update', 'pending_delete'].includes(pg.status) &&
+          !pg.isDeleted
+      ),
+    [pgs]
+  );
 
   const getPGById = useCallback((id) =>
     pgs.find(pg => pg.id === id), [pgs]);
 
   const getOwnerPGs = useCallback((ownerId) =>
     ownerPgs.filter(pg => pg.ownerId === ownerId && !pg.isDeleted), [ownerPgs]);
+
+  const getOwnerPGById = useCallback((ownerId, pgId) =>
+    ownerPgs.find(pg => pg.ownerId === ownerId && pg.id === pgId && !pg.isDeleted), [ownerPgs]);
 
   // ── PG Mutations ──
   const addPG = useCallback(async (pgData, ownerId) => {
@@ -262,6 +273,7 @@ export function DataProvider({ children }) {
     form.append('roomType', pgData.roomType || '');
     form.append('genderPreference', pgData.genderPreference || '');
     form.append('amenities', (pgData.amenities || []).join(','));
+    form.append('rules', (pgData.rules || []).join('\n'));
     form.append('contactNumber', pgData.contactNumber || '');
 
     // Backend accepts uploaded image files; we try to fetch URLs into Blobs,
@@ -280,7 +292,9 @@ export function DataProvider({ children }) {
       }
     }
 
-    await api.post('/owner', form);
+    await api.post('/owner', form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
 
     // Refresh only what matters (owner dashboard).
     if (currentUser?.role === 'admin') await fetchAdminData();
@@ -309,6 +323,7 @@ export function DataProvider({ children }) {
     form.append('roomType', pgData.roomType || '');
     form.append('genderPreference', pgData.genderPreference || '');
     form.append('amenities', (pgData.amenities || []).join(','));
+    form.append('rules', (pgData.rules || []).join('\n'));
     form.append('contactNumber', pgData.contactNumber || '');
 
     for (const rem of removedImages) form.append('removeImages', rem);
@@ -326,20 +341,22 @@ export function DataProvider({ children }) {
       }
     }
 
-    await api.put(`/owner/${id}`, form);
+    await api.put(`/owner/${id}`, form, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
 
     if (currentUser?.role === 'admin') await fetchAdminData();
     else await fetchOwnerPgs();
   }, [HAS_BACKEND, currentUser?.role, fetchAdminData, fetchOwnerPgs]);
 
-  const deletePG = useCallback(async (id) => {
+  const deletePG = useCallback(async (id, reason = '') => {
     if (!HAS_BACKEND) return;
 
     if (currentUser?.role === 'admin') {
       await api.delete(`/admin/pgs/${id}`);
       await fetchAdminData();
     } else {
-      await api.delete(`/owner/${id}`);
+      await api.delete(`/owner/${id}`, { data: { reason } });
       await fetchOwnerPgs();
     }
   }, [HAS_BACKEND, currentUser?.role, fetchAdminData, fetchOwnerPgs]);
@@ -447,6 +464,7 @@ export function DataProvider({ children }) {
       pgs, notifications, reviews,
       users,
       getApprovedPGs, getPGById, getOwnerPGs,
+      getOwnerPGById,
       addPG, updatePG, deletePG, approvePG, rejectPG,
       savePGToggle, getSavedPGs,
       addReview, getPGReviews,

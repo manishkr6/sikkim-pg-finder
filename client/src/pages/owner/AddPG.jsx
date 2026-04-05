@@ -16,6 +16,7 @@ export default function AddPG({ editMode = false, existingPG = null }) {
   const [selectedAmenities, setSelectedAmenities] = useState(existingPG?.amenities || []);
   const [images, setImages] = useState(existingPG?.images || []);
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [rulesText, setRulesText] = useState((existingPG?.rules || []).join('\n'));
   const [isLocating, setIsLocating] = useState(false);
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm({
@@ -141,6 +142,7 @@ export default function AddPG({ editMode = false, existingPG = null }) {
       roomType: data.roomType,
       genderPreference: data.genderPreference,
       amenities: selectedAmenities,
+      rules: rulesText.split('\n').map(r => r.trim()).filter(Boolean),
       images,
       contactNumber: data.contactNumber,
     };
@@ -151,7 +153,7 @@ export default function AddPG({ editMode = false, existingPG = null }) {
         toast.success('PG updated! Awaiting admin re-approval.');
       } else {
         await addPG(pgData, currentUser.id);
-        toast.success('PG submitted for approval!');
+        toast.success('PG listed successfully!');
       }
       navigate('/owner');
     } catch (e) {
@@ -313,7 +315,22 @@ export default function AddPG({ editMode = false, existingPG = null }) {
           </FormSection>
 
           {/* Section 6: Contact */}
-          <FormSection title="Contact Details" step="06" last>
+          <FormSection title="PG Rules" step="06">
+            <div>
+              <label className="block text-sm font-medium text-slate-700 mb-1.5">Rules (optional)</label>
+              <textarea
+                rows={5}
+                value={rulesText}
+                onChange={(e) => setRulesText(e.target.value)}
+                className="input-field resize-none"
+                placeholder={"Add one rule per line\nExample:\nNo loud music after 10 PM\nNo outside guests after 9 PM"}
+              />
+              <p className="text-xs text-slate-500 mt-1">Each line will be shown as a separate rule on PG details page.</p>
+            </div>
+          </FormSection>
+
+          {/* Section 7: Contact */}
+          <FormSection title="Contact Details" step="07" last>
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone Number *</label>
               <input {...register('contactNumber', {
@@ -327,7 +344,7 @@ export default function AddPG({ editMode = false, existingPG = null }) {
           <div className="flex gap-4">
             <button type="button" onClick={() => navigate('/owner')} className="btn-outline flex-1">Cancel</button>
             <button type="submit" disabled={isSubmitting} className="btn-primary flex-1 py-3 disabled:opacity-60">
-              {isSubmitting ? 'Submitting...' : editMode ? 'Update PG' : 'Submit for Approval'}
+              {isSubmitting ? 'Submitting...' : editMode ? 'Update PG' : 'List PG'}
             </button>
           </div>
         </form>

@@ -4,18 +4,21 @@ export default function StatusPill({ status }) {
     approved: 'bg-emerald-100 text-emerald-700 border-emerald-200',
     rejected: 'bg-red-100 text-red-700 border-red-200',
     pending_update: 'bg-orange-100 text-orange-700 border-orange-200',
+    pending_delete: 'bg-rose-100 text-rose-700 border-rose-200',
   };
   const dots = {
     pending: 'bg-amber-500',
     approved: 'bg-emerald-500',
     rejected: 'bg-red-500',
     pending_update: 'bg-orange-500',
+    pending_delete: 'bg-rose-500',
   };
   const labels = {
     pending: 'Pending',
     approved: 'Approved',
     rejected: 'Rejected',
     pending_update: 'Pending Update',
+    pending_delete: 'Pending Delete',
   };
   return (
     <span className={`inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full font-medium border ${styles[status] || 'bg-slate-100 text-slate-600 border-slate-200'}`}>

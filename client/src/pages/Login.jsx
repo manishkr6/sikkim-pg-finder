@@ -16,15 +16,12 @@ export default function Login() {
     setError('');
     try {
       const result = await login(email, password);
-      if (result?.requiresOtp) {
-        toast.success(result?.message || 'OTP sent to your email');
-        navigate('/verify-otp', {
-          state: {
-            email: result.email || email,
-            purpose: 'login',
-          },
-        });
-      }
+      const user = result?.user;
+      if (!user) return;
+      toast.success(`Welcome back, ${user.name.split(' ')[0]}!`);
+      if (user.role === 'admin') navigate('/admin');
+      else if (user.role === 'owner') navigate('/owner');
+      else navigate('/dashboard');
     } catch (e) {
       const message = e?.response?.data?.message || e.message || 'Login failed';
       setError(message);
