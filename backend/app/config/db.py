@@ -22,6 +22,7 @@ def get_database() -> AsyncIOMotorDatabase:
         db.database = db.client[settings.mongodb_db_name]
     return db.database
 
+
 @asynccontextmanager
 async def lifespan(_: FastAPI):
     settings = get_settings()

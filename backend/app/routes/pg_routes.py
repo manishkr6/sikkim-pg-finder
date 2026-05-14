@@ -7,7 +7,7 @@ from app.schemas.pg import PGListQuery
 router = APIRouter(prefix="/api/pgs", tags=["pgs"])
 
 
-@router.get("")
+@router.get("/")
 async def list_pgs(
     city: str | None = None,
     minPrice: float | None = None,
