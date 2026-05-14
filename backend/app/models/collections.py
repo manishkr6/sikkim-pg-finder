@@ -1,0 +1,6 @@
+USERS = "users"
+PGS = "pgs"
+REVIEWS = "reviews"
+REPORTS = "reports"
+NOTIFICATIONS = "notifications"
+OWNER_REQUESTS = "owner_requests"

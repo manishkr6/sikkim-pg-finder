@@ -13,18 +13,27 @@ export default function AdminPending() {
 
   const newPGs = pgs.filter(p => p.status === 'pending' && !p.isDeleted);
   const updatePGs = pgs.filter(p => p.status === 'pending_update' && !p.isDeleted);
+  const deletePGs = pgs.filter(p => p.status === 'pending_delete' && !p.isDeleted);
 
-  const handleApprove = (id) => {
-    approvePG(id);
-    toast.success('PG approved successfully!');
+  const handleApprove = async (id) => {
+    try {
+      await approvePG(id);
+      toast.success('PG approved successfully!');
+    } catch (e) {
+      toast.error(e?.response?.data?.message || 'Failed to approve PG');
+    }
   };
 
-  const handleReject = () => {
+  const handleReject = async () => {
     if (!rejectReason.trim()) { toast.error('Please enter a rejection reason'); return; }
-    rejectPG(rejectModal, rejectReason);
-    setRejectModal(null);
-    setRejectReason('');
-    toast.success('PG rejected');
+    try {
+      await rejectPG(rejectModal, rejectReason);
+      setRejectModal(null);
+      setRejectReason('');
+      toast.success('PG rejected');
+    } catch (e) {
+      toast.error(e?.response?.data?.message || 'Failed to reject PG');
+    }
   };
 
   return (
@@ -37,6 +46,8 @@ export default function AdminPending() {
       <PGSection title="New Submissions" pgs={newPGs} expanded={expanded} setExpanded={setExpanded}
         onApprove={handleApprove} onReject={setRejectModal} users={users} />
       <PGSection title="Pending Updates" pgs={updatePGs} expanded={expanded} setExpanded={setExpanded}
+        onApprove={handleApprove} onReject={setRejectModal} users={users} />
+      <PGSection title="Pending Delete Requests" pgs={deletePGs} expanded={expanded} setExpanded={setExpanded}
         onApprove={handleApprove} onReject={setRejectModal} users={users} />
 
       <Modal isOpen={!!rejectModal} onClose={() => { setRejectModal(null); setRejectReason(''); }}
@@ -104,6 +115,11 @@ function PGSection({ title, pgs, expanded, setExpanded, onApprove, onReject, use
                       {pg.amenities.map(a => <span key={a} className="bg-white text-slate-600 text-xs px-2.5 py-1 rounded-full border border-slate-200">{a}</span>)}
                     </div>
                     <p className="text-xs text-slate-500">Contact: {pg.contactNumber}</p>
+                    {pg.status === 'pending_delete' && pg.deleteRequestReason && (
+                      <p className="text-xs text-red-600 mt-2 bg-red-50 border border-red-100 rounded-lg px-3 py-2">
+                        Delete reason: {pg.deleteRequestReason}
+                      </p>
+                    )}
                     {pg.images?.length > 0 && (
                       <div className="flex gap-2 mt-3 overflow-x-auto">
                         {pg.images.map((img, i) => (

@@ -1,5 +1,5 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, Star, Phone, ArrowRight, Users, MapPin, Building2, CheckCircle2, Quote } from 'lucide-react';
+import { Shield, Star, Phone, ArrowRight, Users, MapPin, Building2, CheckCircle2, Quote, Sparkles } from 'lucide-react';
 import { useData } from '../hooks/useData';
 import PGCard from '../components/ui/PGCard';
 import { SearchBar } from '../components/shared/index.jsx';
@@ -8,6 +8,13 @@ export default function Home() {
   const { getApprovedPGs } = useData();
   const navigate = useNavigate();
   const featured = getApprovedPGs().slice(0, 4);
+  const featuredWithPlaceholders = [
+    ...featured,
+    ...Array.from({ length: Math.max(0, 4 - featured.length) }, (_, i) => ({
+      id: `placeholder-${i}`,
+      isPlaceholder: true,
+    })),
+  ];
 
   const stats = [
     { icon: Building2, value: '500+', label: 'Verified PGs' },
@@ -132,24 +139,62 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 3. FEATURED PGs (Lift-on-hover cards) */}
-      <section className="py-24 bg-slate-50/50">
+      {/* 3. FEATURED PGs (Interactive modern block) */}
+      <section className="py-24 bg-slate-50/60 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_100%_0%,rgba(59,130,246,0.12),transparent_35%),radial-gradient(circle_at_0%_100%,rgba(16,185,129,0.10),transparent_35%)]"></div>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
-            <div>
+          <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between mb-8 gap-6">
+            <div className="max-w-2xl">
               <p className="text-violet-600 text-xs font-bold mb-3 uppercase tracking-widest">Top Picks</p>
               <h2 className="font-serif text-3xl md:text-4xl font-bold text-slate-900 tracking-tight">Featured Residences</h2>
+              <p className="text-slate-500 text-sm mt-3">Curated places with verified owners, transparent pricing, and fast move-in support.</p>
             </div>
-            <Link to="/find-pg" className="bg-white border border-slate-200 text-slate-700 hover:text-violet-700 hover:border-violet-200 px-5 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2 group transition-all shadow-sm hover:shadow-md">
-              View All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
-          </div>
-          {/* Card Grid with group hover mechanics */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {featured.map(pg => (
-              <div key={pg.id} className="transition-transform duration-300 hover:-translate-y-2">
-                <PGCard pg={pg} />
+            <div className="flex items-center gap-3">
+              <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-full bg-white/90 border border-slate-200 text-xs font-semibold text-slate-600 shadow-sm">
+                <Sparkles size={14} className="text-amber-500" />
+                <span>{featured.length} live picks</span>
               </div>
+              <Link to="/find-pg" className="bg-white border border-slate-200 text-slate-700 hover:text-violet-700 hover:border-violet-200 px-5 py-2.5 rounded-full font-semibold text-sm flex items-center gap-2 group transition-all shadow-sm hover:shadow-md">
+                View All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+            </div>
+          </div>
+
+          <div className="relative z-10 flex flex-wrap items-center gap-2 mb-8">
+            {['Under Rs5k', 'Girls', 'Boys', 'Co-ed', 'WiFi + Food'].map((label) => (
+              <button
+                key={label}
+                onClick={() => navigate('/find-pg')}
+                className="px-3.5 py-1.5 rounded-full bg-white border border-slate-200 text-xs font-medium text-slate-600 hover:border-violet-300 hover:text-violet-700 hover:bg-violet-50 transition-colors"
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {featuredWithPlaceholders.map((pg) => (
+              pg.isPlaceholder ? (
+                <div key={pg.id} className="rounded-3xl border border-dashed border-slate-300 bg-white/70 backdrop-blur-sm p-6 flex flex-col justify-between min-h-[360px]">
+                  <div>
+                    <div className="w-10 h-10 rounded-2xl bg-violet-100 text-violet-700 flex items-center justify-center mb-4">
+                      <Building2 size={18} />
+                    </div>
+                    <h3 className="font-serif text-xl font-bold text-slate-900">More verified PGs coming in this zone</h3>
+                    <p className="text-slate-500 text-sm mt-3">List your property now and get discovered by students and professionals.</p>
+                  </div>
+                  <button
+                    onClick={() => navigate('/list-your-pg')}
+                    className="mt-6 inline-flex items-center justify-center gap-2 w-full px-4 py-3 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors"
+                  >
+                    List Your PG <ArrowRight size={15} />
+                  </button>
+                </div>
+              ) : (
+                <div key={pg.id} className="transition-transform duration-300 hover:-translate-y-2">
+                  <PGCard pg={pg} />
+                </div>
+              )
             ))}
           </div>
         </div>

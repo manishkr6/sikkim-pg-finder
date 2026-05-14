@@ -25,7 +25,7 @@ export default function PGCard({ pg, showStatus = false }) {
   return (
     <div
       onClick={() => navigate(`/pg/${pg.id}`)}
-      className="card cursor-pointer group hover:-translate-y-1.5 hover:shadow-2xl hover:shadow-slate-900/10 transition-all duration-300"
+      className="card cursor-pointer group rounded-3xl overflow-hidden hover:-translate-y-2 hover:shadow-2xl hover:shadow-slate-900/10 transition-all duration-300"
     >
       <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-primary-100 via-white to-cyan-100">
         {pg.images?.[0] ? (
@@ -36,7 +36,7 @@ export default function PGCard({ pg, showStatus = false }) {
           </div>
         )}
 
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/35 via-transparent to-transparent opacity-70" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/45 via-slate-900/5 to-transparent opacity-80" />
 
         <div className="absolute top-3 left-3">
           {pg.status === 'approved' && <VerifiedBadge size="sm" />}
@@ -86,6 +86,11 @@ export default function PGCard({ pg, showStatus = false }) {
           <span className="text-xs bg-slate-100 text-slate-600 px-2 py-1 rounded-full flex items-center gap-1">
             <Users size={10} /> {pg.genderPreference}
           </span>
+        </div>
+
+        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+          <span className="text-[11px] text-slate-400">Tap to view details</span>
+          <span className="text-xs font-semibold text-primary-600 group-hover:translate-x-1 transition-transform">Explore</span>
         </div>
       </div>
     </div>

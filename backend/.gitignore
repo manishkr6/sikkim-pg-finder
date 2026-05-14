@@ -9,4 +9,5 @@ coverage/
 .DS_Store
 unwanted
 Thumbs.db
+
 *__pycache__

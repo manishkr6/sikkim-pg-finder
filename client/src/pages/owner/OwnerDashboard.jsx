@@ -19,19 +19,29 @@ export default function OwnerDashboard() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('pgs');
   const [deleteId, setDeleteId] = useState(null);
+  const [deleteReason, setDeleteReason] = useState('');
 
   const myPGs = getOwnerPGs(currentUser?.id);
   const stats = {
     total: myPGs.length,
     approved: myPGs.filter(p => p.status === 'approved').length,
-    pending: myPGs.filter(p => p.status === 'pending' || p.status === 'pending_update').length,
+    pending: myPGs.filter(p => p.status === 'pending' || p.status === 'pending_update' || p.status === 'pending_delete').length,
     rejected: myPGs.filter(p => p.status === 'rejected').length,
   };
 
-  const handleDelete = () => {
-    deletePG(deleteId);
-    setDeleteId(null);
-    toast.success('PG deleted successfully');
+  const handleDelete = async () => {
+    if (deleteReason.trim().length < 10) {
+      toast.error('Please enter delete reason (minimum 10 characters)');
+      return;
+    }
+    try {
+      await deletePG(deleteId, deleteReason.trim());
+      setDeleteId(null);
+      setDeleteReason('');
+      toast.success('Deletion request sent to admin');
+    } catch (e) {
+      toast.error(e?.response?.data?.message || 'Failed to send deletion request');
+    }
   };
 
   return (
@@ -118,9 +128,16 @@ export default function OwnerDashboard() {
         )}
       </div>
 
-      <Modal isOpen={!!deleteId} onClose={() => setDeleteId(null)} title="Delete PG"
-        onConfirm={handleDelete} confirmText="Delete" confirmVariant="danger">
-        <p className="text-slate-600 text-sm">Are you sure you want to delete this PG? This action cannot be undone.</p>
+      <Modal isOpen={!!deleteId} onClose={() => { setDeleteId(null); setDeleteReason(''); }} title="Delete PG"
+        onConfirm={handleDelete} confirmText="Send Request" confirmVariant="danger">
+        <p className="text-slate-600 text-sm mb-3">Delete requires admin approval. Please provide the reason for deletion.</p>
+        <textarea
+          value={deleteReason}
+          onChange={(e) => setDeleteReason(e.target.value)}
+          rows={4}
+          className="input-field resize-none text-sm"
+          placeholder="Example: Property lease ended, listing is no longer active."
+        />
       </Modal>
     </div>
   );

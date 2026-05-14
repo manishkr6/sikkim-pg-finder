@@ -4,12 +4,13 @@ import { useData } from '../../hooks/useData';
 import { formatDistanceToNow } from '../../utils/time';
 
 const TYPE_ICONS = {
-  ADD_PG: { icon: '🏠', color: 'bg-blue-100 text-blue-700' },
-  UPDATE_PG: { icon: '✏️', color: 'bg-amber-100 text-amber-700' },
-  DELETE_PG: { icon: '🗑️', color: 'bg-red-100 text-red-700' },
-  REPORT_PG: { icon: '⚠️', color: 'bg-red-100 text-red-700' },
-  USER_SIGNUP: { icon: '👤', color: 'bg-emerald-100 text-emerald-700' },
-  OWNER_REQUEST: { icon: '🔑', color: 'bg-purple-100 text-purple-700' },
+  ADD_PG: { icon: '[ADD]', color: 'bg-blue-100 text-blue-700' },
+  UPDATE_PG: { icon: '[UPD]', color: 'bg-amber-100 text-amber-700' },
+  DELETE_PG: { icon: '[DEL]', color: 'bg-red-100 text-red-700' },
+  REPORT_PG: { icon: '[RPT]', color: 'bg-red-100 text-red-700' },
+  FEEDBACK: { icon: '[FDB]', color: 'bg-indigo-100 text-indigo-700' },
+  USER_SIGNUP: { icon: '[USR]', color: 'bg-emerald-100 text-emerald-700' },
+  OWNER_REQUEST: { icon: '[OWN]', color: 'bg-purple-100 text-purple-700' },
 };
 
 export default function AdminDashboard() {
@@ -18,7 +19,14 @@ export default function AdminDashboard() {
 
   const stats = [
     { label: 'Total PGs', value: pgs.filter(p => !p.isDeleted).length, icon: Building2, bg: 'bg-primary-50', color: 'text-primary-600', border: 'border-primary-100' },
-    { label: 'Pending Approval', value: pgs.filter(p => (p.status === 'pending' || p.status === 'pending_update') && !p.isDeleted).length, icon: Clock, bg: 'bg-amber-50', color: 'text-amber-600', border: 'border-amber-100' },
+    {
+      label: 'Pending Approval',
+      value: pgs.filter(p => (p.status === 'pending' || p.status === 'pending_update' || p.status === 'pending_delete') && !p.isDeleted).length,
+      icon: Clock,
+      bg: 'bg-amber-50',
+      color: 'text-amber-600',
+      border: 'border-amber-100',
+    },
     { label: 'Total Users', value: users.length, icon: Users, bg: 'bg-blue-50', color: 'text-blue-600', border: 'border-blue-100' },
     { label: 'Total Owners', value: users.filter(u => u.role === 'owner').length, icon: UserCheck, bg: 'bg-emerald-50', color: 'text-emerald-600', border: 'border-emerald-100' },
   ];
@@ -32,7 +40,6 @@ export default function AdminDashboard() {
         <p className="text-slate-500 text-sm mt-1">Overview of Sikkim PG Finder platform</p>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-5">
         {stats.map(s => (
           <div key={s.label} className={`bg-white rounded-2xl p-6 border ${s.border} shadow-sm`}>
@@ -46,7 +53,6 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Recent Activity */}
         <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
           <div className="flex items-center justify-between p-6 border-b border-slate-100">
             <h2 className="font-semibold text-slate-900">Recent Activity</h2>
@@ -54,10 +60,10 @@ export default function AdminDashboard() {
           </div>
           <div className="divide-y divide-slate-50">
             {recent.map(n => {
-              const meta = TYPE_ICONS[n.type] || { icon: '📌', color: 'bg-slate-100 text-slate-600' };
+              const meta = TYPE_ICONS[n.type] || { icon: '[NTF]', color: 'bg-slate-100 text-slate-600' };
               return (
                 <div key={n.id} className={`flex items-start gap-4 px-6 py-4 ${!n.isRead ? 'bg-blue-50/40' : ''}`}>
-                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-lg shrink-0 ${meta.color}`}>{meta.icon}</div>
+                  <div className={`w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0 ${meta.color}`}>{meta.icon}</div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-slate-700 leading-relaxed">{n.message}</p>
                     <p className="text-slate-400 text-xs mt-1">{formatDistanceToNow(n.createdAt)}</p>
@@ -69,30 +75,34 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="space-y-5">
           <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
             <h2 className="font-semibold text-slate-900 mb-4">Quick Actions</h2>
             <div className="space-y-3">
-              <button onClick={() => navigate('/admin/pending')}
-                className="w-full flex items-center justify-between p-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl transition-colors text-sm font-medium">
+              <button
+                onClick={() => navigate('/admin/pending')}
+                className="w-full flex items-center justify-between p-3.5 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-xl transition-colors text-sm font-medium"
+              >
                 <span className="flex items-center gap-2"><Clock size={15}/> View Pending PGs</span>
                 <span className="bg-amber-200 text-amber-800 text-xs px-2 py-0.5 rounded-full font-bold">
-                  {pgs.filter(p => (p.status === 'pending' || p.status === 'pending_update') && !p.isDeleted).length}
+                  {pgs.filter(p => (p.status === 'pending' || p.status === 'pending_update' || p.status === 'pending_delete') && !p.isDeleted).length}
                 </span>
               </button>
-              <button onClick={() => navigate('/admin/users')}
-                className="w-full flex items-center gap-2 p-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors text-sm font-medium">
+              <button
+                onClick={() => navigate('/admin/users')}
+                className="w-full flex items-center gap-2 p-3.5 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-xl transition-colors text-sm font-medium"
+              >
                 <Users size={15}/> Manage Users
               </button>
-              <button onClick={() => navigate('/admin/pgs')}
-                className="w-full flex items-center gap-2 p-3.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-xl transition-colors text-sm font-medium">
+              <button
+                onClick={() => navigate('/admin/pgs')}
+                className="w-full flex items-center gap-2 p-3.5 bg-primary-50 hover:bg-primary-100 text-primary-700 rounded-xl transition-colors text-sm font-medium"
+              >
                 <Building2 size={15}/> All PG Listings
               </button>
             </div>
           </div>
 
-          {/* Mini Chart */}
           <div className="bg-primary-600 rounded-2xl p-6 text-white">
             <div className="flex items-center gap-2 mb-4">
               <TrendingUp size={18} />
